@@ -2,7 +2,7 @@
     .globl _start
 _start:
     la sp, bootstacktop
-    call kernel_main
+    call kstart
 
     .section .bss.stack
     .align 12
