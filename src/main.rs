@@ -11,10 +11,6 @@ global_asm!(include_str!("asm/boot.S"));
 #[no_mangle]
 extern "C" fn kstart() -> ! {
     init::init();
-    extern "C" {
-        fn _start();
-        fn bootstacktop();
-    }
     abort();
 }
 

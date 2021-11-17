@@ -8,6 +8,8 @@ objcopy := rust-objcopy --binary-architecture=riscv64
 
 .PHONY: kernel build clean qemu run env
 
+build: $(bin)
+
 env:
 	cargo install cargo-binutils
 	rustup component add llvm-tools-preview rustfmt
@@ -21,8 +23,6 @@ $(bin): kernel
 
 asm:
 	$(objdump) -d $(kernel) | less
-
-build: $(bin)
 
 clean:
 	cargo clean
