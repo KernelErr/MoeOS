@@ -24,6 +24,7 @@ SECTIONS
     }
 
     .data : {
+        . = ALIGN(4K);
         sdata = .;
         *(.data .data.*)
         edata = .;
@@ -39,5 +40,10 @@ SECTIONS
         ebss = .;
     }
 
-    PROVIDE(end = .);
+    end = .;
+
+    PROVIDE(_stack_start = ebss);
+    PROVIDE(_stack_end = _stack_start + 0x8000);
+
+    PROVIDE(_heap_start = _stack_end);
 }

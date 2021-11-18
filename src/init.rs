@@ -1,5 +1,5 @@
-use crate::println;
 use crate::device::fdt::read_fdt_mem;
+use crate::println;
 
 const BUILD_NAME: &str = env!("BUILD_NAME");
 const BUILD_VERSION: &str = env!("BUILD_VERSION");
@@ -13,7 +13,7 @@ pub fn init(_a0: usize, a1: usize) {
     let fdt_mem = read_fdt_mem(a1);
     let fdt = fdt::Fdt::new(&fdt_mem).unwrap();
 
-    print_device_info(&fdt);
+    process_device_info(&fdt);
 }
 
 fn print_banner() {
@@ -35,15 +35,24 @@ fn print_memory_info(fdt_addr: usize) {
     println!();
 }
 
-fn print_device_info(fdt: &fdt::Fdt) {
+fn process_device_info(fdt: &fdt::Fdt) {
     println!("Device information:");
 
     println!("CPU count: {}", fdt.cpus().count());
 
-    println!("Available memory:");
-    for node in fdt.memory().regions() {
-        println!("0x{:x}: {}MByte", node.starting_address as usize, node.size.unwrap_or(0) / 1024 / 1024);
+    let memory = fdt.memory().regions().next().unwrap();
+    extern "C" {
+        fn _heap_start();
     }
+    let heap_start = _heap_start as usize;
+    let heap_end = memory.starting_address as usize + memory.size.unwrap();
+    println!(
+        "Available memory: 0x{:x} ~ 0x{:x} ({}MByte)",
+        heap_start,
+        heap_end,
+        (heap_end - heap_start) / 1024 / 1024
+    );
+    crate::mem::page::init(heap_start, memory.size.unwrap());
 
     let chosen = fdt.chosen();
     if let Some(stdout) = chosen.stdout() {

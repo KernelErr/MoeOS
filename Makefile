@@ -34,4 +34,10 @@ qemu: build
         -bios sbi/fw_payload.bin \
         -device loader,file=$(bin),addr=0x80200000
 
+fmt:
+	cargo fmt
+
+clippy:
+	cargo clippy
+
 run: build qemu

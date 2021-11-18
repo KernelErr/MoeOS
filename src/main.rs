@@ -2,10 +2,11 @@
 #![no_main]
 #![feature(global_asm, asm, panic_info_message)]
 
+mod device;
 mod init;
 mod io;
+mod mem;
 mod sbi;
-mod device;
 
 global_asm!(include_str!("asm/boot.S"));
 

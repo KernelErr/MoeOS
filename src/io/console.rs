@@ -45,3 +45,12 @@ pub fn puts(s: &str) {
         putchar(c);
     }
 }
+
+pub fn getchar() -> Option<char> {
+    let c = sbi_call(LegacyExt::ConsoleGetchar, 0, 0, 0);
+    if c == usize::MAX {
+        None
+    } else {
+        Some(c as u8 as char)
+    }
+}
