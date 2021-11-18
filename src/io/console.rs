@@ -1,4 +1,4 @@
-use crate::sbi::sbi_call;
+use crate::sbi::{sbi_call, LegacyExt};
 use core::fmt::Write;
 
 pub struct Stdout;
@@ -16,12 +16,15 @@ macro_rules! print
 macro_rules! println
 {
 	() => ({
+		use crate::print;
 		print!("\r\n")
 	});
 	($fmt:expr) => ({
+		use crate::print;
 		print!(concat!($fmt, "\r\n"))
 	});
 	($fmt:expr, $($args:tt)+) => ({
+		use crate::print;
 		print!(concat!($fmt, "\r\n"), $($args)+)
 	});
 }
@@ -34,7 +37,7 @@ impl Write for Stdout {
 }
 
 pub fn putchar(c: char) {
-    sbi_call(1, c as usize, 0, 0);
+    sbi_call(LegacyExt::ConsolePutchar, c as usize, 0, 0);
 }
 
 pub fn puts(s: &str) {
