@@ -1,4 +1,6 @@
+use crate::{print, println};
 use core::mem::size_of;
+use core::panic;
 use core::ptr::null_mut;
 
 static mut HEAP_START: usize = 0;
@@ -7,7 +9,7 @@ static mut ALLOC_START: usize = 0;
 const PAGE_ORDER: usize = 12;
 pub const PAGE_SIZE: usize = 1 << 12; // 4096 = 4KBytes
 
-fn align_val(val: usize, order: usize) -> usize {
+pub fn align(val: usize, order: usize) -> usize {
     let o = (1usize << order) - 1;
     (val + o) & !o
 }
@@ -36,8 +38,8 @@ struct Page {
 }
 
 impl Page {
-    pub fn set_flags(&mut self, flags: PageBits) {
-        self.flags = flags.into();
+    pub fn set_flag(&mut self, flags: PageBits) {
+        self.flags |= flags.val();
     }
 
     pub fn clear(&mut self) {
@@ -66,16 +68,19 @@ pub fn init(heap_start: usize, heap_size: usize) {
         for i in 0..num_pages {
             (*p.add(i)).clear();
         }
-        ALLOC_START = align_val(HEAP_START + num_pages * size_of::<Page>(), PAGE_ORDER);
+        ALLOC_START = align(HEAP_START + num_pages * size_of::<Page>(), PAGE_ORDER);
     }
 }
 
 pub fn alloc(pages: usize) -> *mut u8 {
     if pages == 0 {
-        return null_mut();
+        panic!("Trying to alloc zero page");
     }
     unsafe {
         let num_pages = HEAP_SIZE / PAGE_SIZE;
+        if pages > num_pages {
+            panic!("Not enough memory");
+        }
         let p = HEAP_START as *mut Page;
         for i in 0..num_pages - pages {
             let mut found = false;
@@ -90,9 +95,9 @@ pub fn alloc(pages: usize) -> *mut u8 {
             }
             if found {
                 for k in i..=i + pages - 1 {
-                    (*p.add(k)).set_flags(PageBits::Taken);
+                    (*p.add(k)).set_flag(PageBits::Taken);
                 }
-                (*p.add(i + pages - 1)).set_flags(PageBits::Last);
+                (*p.add(i + pages - 1)).set_flag(PageBits::Last);
                 return (i * PAGE_SIZE + ALLOC_START) as *mut u8;
             }
         }
@@ -116,12 +121,12 @@ pub fn zalloc(pages: usize) -> *mut u8 {
 
 pub fn dealloc(ptr: *mut u8) {
     if ptr.is_null() {
-        return;
+        panic!("Trying to dealloc a null pointer")
     }
     unsafe {
         let addr = HEAP_START + (ptr as usize - ALLOC_START) / PAGE_SIZE;
         if (addr < HEAP_START) || (addr >= HEAP_START + HEAP_SIZE) {
-            return;
+            panic!("Trying to dealloc an illegal address")
         }
         let mut p = addr as *mut Page;
         while (*p).is_taken() && !(*p).is_last() {

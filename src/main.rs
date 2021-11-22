@@ -9,6 +9,7 @@ mod mem;
 mod sbi;
 
 global_asm!(include_str!("asm/boot.S"));
+global_asm!(include_str!("asm/mem.S"));
 
 #[no_mangle]
 extern "C" fn kstart() -> ! {
