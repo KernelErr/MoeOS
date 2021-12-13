@@ -1,5 +1,5 @@
 use crate::device::fdt::read_fdt_mem;
-use crate::mem::{mmu, page};
+use crate::mem::mmu;
 use crate::println;
 
 const BUILD_NAME: &str = env!("BUILD_NAME");
@@ -26,11 +26,16 @@ pub fn init(_a0: usize, a1: usize) {
     print_memory_info(a1);
 
     let fdt_mem = read_fdt_mem(a1);
-    let fdt = fdt::Fdt::new(&fdt_mem).unwrap();
-
-    process_device_info(&fdt);
-
-    init_mmu();
+    match fdt::Fdt::new(&fdt_mem) {
+        Ok(fdt) => {
+            process_device_info(&fdt);
+            init_mmu();
+        }
+        Err(_) => {
+            println!("No FDT Found, start kernel in D1s mode");
+            crate::device::d1s::memory_init();
+        }
+    }; 
 }
 
 fn print_banner() {

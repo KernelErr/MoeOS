@@ -34,6 +34,12 @@ qemu: build
         -bios sbi/fw_payload.bin \
         -device loader,file=$(bin),addr=0x80200000
 
+d1s: build
+	xfel ddr ddr2
+	xfel write 0x80000000 ./sbi/fw_jump_d1.bin
+	xfel write 0x80200000 $(bin)
+	xfel exec 0x80000000
+
 fmt:
 	cargo fmt
 
