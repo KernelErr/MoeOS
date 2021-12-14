@@ -29,13 +29,14 @@ pub fn init(_a0: usize, a1: usize) {
     match fdt::Fdt::new(&fdt_mem) {
         Ok(fdt) => {
             process_device_info(&fdt);
-            init_mmu();
         }
         Err(_) => {
             println!("No FDT Found, start kernel in D1s mode");
             crate::device::d1s::memory_init();
         }
-    }; 
+    };
+
+    init_mmu();
 }
 
 fn print_banner() {
@@ -140,6 +141,5 @@ fn init_mmu() {
             mmu::EntryBits::ReadWrite.val(),
         );
     }
-
     mmu::set_satp(table_ptr);
 }

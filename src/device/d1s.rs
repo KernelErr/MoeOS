@@ -7,7 +7,7 @@ pub fn memory_init() {
     }
     let heap_start = _heap_start as usize;
     let memory_size = 64 * 1024 * 1024;
-    let memory_start = 0x80000000;
+    let memory_start = 0x40000000;
     let heap_end = memory_size + memory_start;
     println!(
         "Kernel memory: 0x{:x} ~ 0x{:x} ({}MByte)",

@@ -27,18 +27,24 @@ asm:
 clean:
 	cargo clean
 
-qemu: build
+qemu: qemu_lds build
 	qemu-system-riscv64 \
         -machine virt \
         -nographic \
         -bios sbi/fw_payload.bin \
         -device loader,file=$(bin),addr=0x80200000
 
-d1s: build
+d1s: d1s_lds build
 	xfel ddr ddr2
-	xfel write 0x80000000 ./sbi/fw_jump_d1.bin
-	xfel write 0x80200000 $(bin)
-	xfel exec 0x80000000
+	xfel write 0x40000000 ./sbi/fw_jump_d1.bin
+	xfel write 0x40200000 $(bin)
+	xfel exec 0x40000000
+
+qemu_lds:
+	cat src/lds/virt_qemu.lds > src/lds/virt.lds
+
+d1s_lds:
+	cat src/lds/virt_d1.lds > src/lds/virt.lds
 
 fmt:
 	cargo fmt
