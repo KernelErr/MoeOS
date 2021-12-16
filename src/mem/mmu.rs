@@ -1,5 +1,6 @@
 use super::page::{align, dealloc, zalloc, PAGE_SIZE};
 use core::ptr::null_mut;
+use riscv::register::satp;
 
 static mut PAGE_TABLE: *mut Table = null_mut();
 
@@ -15,12 +16,8 @@ pub fn get_page_table() -> *mut Table {
 
 pub fn set_satp(addr: usize) {
     let ppn = addr >> 12;
-    let val = 8 << 60 | ppn;
     unsafe {
-        asm!(
-            "csrw satp, {0}",
-            in(reg) val,
-        );
+        satp::set(satp::Mode::Sv39, 0, ppn);
     }
 }
 
@@ -44,6 +41,12 @@ pub enum EntryBits {
     UserReadWrite = 1 << 1 | 1 << 2 | 1 << 4,
     UserReadExecute = 1 << 1 | 1 << 3 | 1 << 4,
     UserReadWriteExecute = 1 << 1 | 1 << 2 | 1 << 3 | 1 << 4,
+
+    // T-HEAD Extend
+    Sec = 1 << 59,
+    Buffer = 1 << 61,
+    Cacheable = 1 << 62,
+    StrongOrder = 1 << 63,
 }
 
 impl EntryBits {
@@ -128,6 +131,7 @@ pub fn map(root: &mut Table, vaddr: usize, paddr: usize, bits: u64, level: usize
         v = unsafe { entry.add(vpn[i]).as_mut().unwrap() };
     }
 
+    // TODO: Complete C-SKY Extentions
     let entry = (ppn[2] << 28) as u64 |   // PPN[2] = [53:28]
 	            (ppn[1] << 19) as u64 |   // PPN[1] = [27:19]
 				(ppn[0] << 10) as u64 |   // PPN[0] = [18:10]

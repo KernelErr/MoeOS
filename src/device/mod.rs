@@ -1,2 +1,2 @@
-pub mod fdt;
 pub mod d1s;
+pub mod fdt;

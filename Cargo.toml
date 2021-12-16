@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 fdt = "0.1"
 byteorder = { version = "1", default-features = false }
+riscv = "0.7"
 
 [build-dependencies]
 chrono = "0.4"

@@ -1,6 +1,6 @@
-use crate::println;
+use crate::info;
 
-pub fn memory_init() {
+pub fn init() {
     extern "C" {
         fn end();
         fn _heap_start();
@@ -9,13 +9,13 @@ pub fn memory_init() {
     let memory_size = 64 * 1024 * 1024;
     let memory_start = 0x40000000;
     let heap_end = memory_size + memory_start;
-    println!(
+    info!(
         "Kernel memory: 0x{:x} ~ 0x{:x} ({}MByte)",
         memory_start,
         end as usize,
         (end as usize - memory_start) / 1024 / 1024
     );
-    println!(
+    info!(
         "User memory: 0x{:x} ~ 0x{:x} ({}MByte)",
         heap_start,
         heap_end,
