@@ -17,15 +17,19 @@ impl From<LegacyExt> for usize {
     }
 }
 
-pub fn sbi_call(which: LegacyExt, arg0: usize, arg1: usize, arg2: usize) -> usize {
+pub fn set_timer(time: usize) {
+    sbi_call(0x54494D45, 0, time, 0, 0);
+}
+
+pub fn sbi_call(eid: usize, fid: usize, arg0: usize, arg1: usize, arg2: usize) -> usize {
     let ret;
-    let which: usize = which.into();
     unsafe {
         asm!("ecall",
              inout("x10") arg0 => ret,
                 in("x11") arg1,
                 in("x12") arg2,
-                in("x17") which
+                in("x17") eid,
+                in("x16") fid,
         );
     }
     ret

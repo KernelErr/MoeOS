@@ -1,6 +1,4 @@
 .section .rodata
-.global HEAP_START
-HEAP_START: .dword _heap_start
 
 .global TEXT_START
 TEXT_START: .dword stext
@@ -25,9 +23,3 @@ BSS_START: .dword sbss
 
 .global BSS_END
 BSS_END: .dword ebss
-
-.global KERNEL_STACK_START
-KERNEL_STACK_START: .dword _stack_start
-
-.global KERNEL_STACK_END
-KERNEL_STACK_END: .dword _stack_end

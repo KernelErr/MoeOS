@@ -8,42 +8,36 @@ SECTIONS
     . = BASE_ADDRESS;
     start = .;
 
+    stext = .;
     .text : {
-        stext = .;
         *(.text.entry)
         *(.text .text.*)
-        . = ALIGN(4K);
-        etext = .;
     }
+    . = ALIGN(4K);
+    etext = .;
 
+    srodata = .;
     .rodata : {
-        srodata = .;
         *(.rodata .rodata.*)
-        . = ALIGN(4K);
-        erodata = .;
     }
+    . = ALIGN(4K);
+    erodata = .;
 
+    sdata = .;
     .data : {
-        . = ALIGN(4K);
-        sdata = .;
         *(.data .data.*)
-        edata = .;
     }
-
-    .stack : {
-        *(.bss.stack)
-    }
+    . = ALIGN(4K);
+    edata = .;
 
     .bss : {
+        *(.bss.stack)
         sbss = .;
         *(.bss .bss.*)
-        ebss = .;
+        *(.sbss .sbss.*)
     }
+    . = ALIGN(4K);
+    ebss = .;
 
     end = .;
-
-    PROVIDE(_stack_start = ebss);
-    PROVIDE(_stack_end = _stack_start + 0x8000);
-
-    PROVIDE(_heap_start = _stack_end);
 }

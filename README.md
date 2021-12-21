@@ -35,6 +35,10 @@ make d1s
 
 ![latest-running-on-D1s](./docs/images/latest-running-on-D1s.png)
 
+![mq](./docs/images/mq.jpg)
+
+目前MoeOS在[麻雀](https://mangopi.org.cn/mangopi_mq)开发板上持续开发中。
+
 ## 感谢
 
 > (　ﾟ∀ﾟ) ﾉ♡没有他们就没有MoeOS

@@ -52,4 +52,7 @@ fmt:
 clippy:
 	cargo clippy
 
+dump: build
+	riscv64-linux-gnu-objdump -d target/riscv64gc-unknown-none-elf/debug/moeos > dump
+
 run: build qemu

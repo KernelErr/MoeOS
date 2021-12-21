@@ -1,4 +1,3 @@
-use crate::{print, println};
 use core::mem::size_of;
 use core::panic;
 use core::ptr::null_mut;
@@ -79,7 +78,7 @@ pub fn alloc(pages: usize) -> *mut u8 {
     unsafe {
         let num_pages = HEAP_SIZE / PAGE_SIZE;
         if pages > num_pages {
-            panic!("Not enough memory");
+            panic!("Not enough memory, {}/{}", pages, num_pages);
         }
         let p = HEAP_START as *mut Page;
         for i in 0..num_pages - pages {

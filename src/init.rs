@@ -16,8 +16,6 @@ extern "C" {
     static RODATA_END: usize;
     static BSS_START: usize;
     static BSS_END: usize;
-    static KERNEL_STACK_START: usize;
-    static KERNEL_STACK_END: usize;
 }
 
 pub fn init(_a0: usize, a1: usize) {
@@ -27,16 +25,23 @@ pub fn init(_a0: usize, a1: usize) {
     let fdt_mem = read_fdt_mem(a1);
     match fdt::Fdt::new(&fdt_mem) {
         Ok(fdt) => {
+            // TODO: Refactor
+            unsafe {
+                crate::timer::CLOCK_FREQ = 12500000;
+            }
             process_device_info(&fdt);
         }
         Err(_) => {
             warn!("No FDT Found, switch to D1s mode");
+            crate::device::d1s::config::init();
             crate::device::d1s::mq::blue_led_on();
             crate::device::d1s::mem::init();
         }
     };
 
     init_mmu();
+    crate::trap::init();
+    crate::timer::init();
 
     info!("Initialized kernel successfully");
 }
@@ -49,16 +54,15 @@ fn print_banner() {
 fn process_device_info(fdt: &fdt::Fdt) {
     let memory = fdt.memory().regions().next().unwrap();
     extern "C" {
-        fn end();
-        fn _heap_start();
+        fn boot_stack();
     }
-    let heap_start = _heap_start as usize;
+    let heap_start = boot_stack as usize + 0x80000;
     let heap_end = memory.starting_address as usize + memory.size.unwrap();
     info!(
         "Kernel memory: 0x{:x} ~ 0x{:x} ({}MByte)",
         memory.starting_address as usize,
-        end as usize,
-        (end as usize - memory.starting_address as usize) / 1024 / 1024
+        heap_start as usize,
+        (heap_start - memory.starting_address as usize) / 1024 / 1024
     );
     info!(
         "User memory: 0x{:x} ~ 0x{:x} ({}MByte)",
@@ -76,6 +80,11 @@ fn init_mmu() {
     let mut table_ref = unsafe { table.as_mut().unwrap() };
     let page_bits = mmu::EntryBits::Access.val() | mmu::EntryBits::Dirty.val();
 
+    extern "C" {
+        fn boot_stack();
+        fn boot_stack_top();
+    }
+
     unsafe {
         mmu::map_range(
             &mut table_ref,
@@ -88,7 +97,7 @@ fn init_mmu() {
             &mut table_ref,
             RODATA_START,
             RODATA_END,
-            mmu::EntryBits::ReadExecute.val() | page_bits,
+            mmu::EntryBits::Read.val() | page_bits,
         );
 
         mmu::map_range(
@@ -107,9 +116,9 @@ fn init_mmu() {
 
         mmu::map_range(
             &mut table_ref,
-            KERNEL_STACK_START,
-            KERNEL_STACK_END,
-            mmu::EntryBits::ReadWrite.val() | page_bits,
+            boot_stack as usize,
+            boot_stack_top as usize,
+            mmu::EntryBits::ReadWriteExecute.val() | page_bits,
         );
     }
 
@@ -118,5 +127,5 @@ fn init_mmu() {
         asm!("sfence.vma");
     }
 
-    info!("MMU initialized");
+    info!("MMU ready");
 }

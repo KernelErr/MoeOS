@@ -47,10 +47,12 @@ macro_rules! debug
 {
 	($fmt:expr) => ({
 		use crate::print;
+		#[cfg(debug_assertions)]
 		print!(concat!("\u{1b}[34mDEBUG\u{1b}[0m ", concat!($fmt, "\r\n")))
 	});
 	($fmt:expr, $($args:tt)+) => ({
 		use crate::print;
+		#[cfg(debug_assertions)]
 		print!(concat!("\u{1b}[34mDEBUG\u{1b}[0m ", concat!($fmt, "\r\n")), $($args)+)
 	});
 }
@@ -102,7 +104,7 @@ impl Write for Stdout {
 }
 
 pub fn putchar(c: char) {
-    sbi_call(LegacyExt::ConsolePutchar, c as usize, 0, 0);
+    sbi_call(LegacyExt::ConsolePutchar.into(), 0, c as usize, 0, 0);
 }
 
 pub fn puts(s: &str) {
@@ -112,7 +114,7 @@ pub fn puts(s: &str) {
 }
 
 pub fn getchar() -> Option<char> {
-    let c = sbi_call(LegacyExt::ConsoleGetchar, 0, 0, 0);
+    let c = sbi_call(LegacyExt::ConsoleGetchar.into(), 0, 0, 0, 0);
     if c == usize::MAX {
         None
     } else {

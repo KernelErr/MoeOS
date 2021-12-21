@@ -7,12 +7,13 @@ mod init;
 mod io;
 mod mem;
 mod sbi;
+mod trap;
+mod timer;
 mod tests;
-
-use riscv::register::{scause, sepc, sscratch, stvec};
 
 global_asm!(include_str!("asm/boot.S"));
 global_asm!(include_str!("asm/mem.S"));
+global_asm!(include_str!("asm/trap.S"));
 
 #[no_mangle]
 extern "C" fn kstart() -> ! {
@@ -29,12 +30,23 @@ extern "C" fn kstart() -> ! {
         );
     }
 
+    clear_bss();
     init::init(a0, a1);
 
     #[cfg(debug_assertions)]
     tests::start();
 
     abort();
+}
+
+fn clear_bss() {
+    extern "C" {
+        fn sbss();
+        fn ebss();
+    }
+    (sbss as usize..ebss as usize).for_each(|a| {
+        unsafe { (a as *mut u8).write_volatile(0) }
+    });
 }
 
 fn abort() -> ! {
