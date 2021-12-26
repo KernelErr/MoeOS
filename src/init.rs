@@ -1,6 +1,7 @@
 use crate::device::fdt::read_fdt_mem;
 use crate::mem::mmu;
 use crate::{info, println, warn};
+use core::arch::asm;
 
 const BUILD_NAME: &str = env!("BUILD_NAME");
 const BUILD_VERSION: &str = env!("BUILD_VERSION");

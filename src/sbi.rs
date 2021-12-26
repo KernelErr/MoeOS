@@ -1,3 +1,5 @@
+use core::arch::asm;
+
 #[allow(dead_code)]
 pub enum LegacyExt {
     SetTimer = 0,

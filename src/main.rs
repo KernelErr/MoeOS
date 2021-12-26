@@ -1,6 +1,7 @@
 #![no_std]
 #![no_main]
-#![feature(global_asm, asm, panic_info_message)]
+#![feature(panic_info_message)]
+use core::arch::{asm, global_asm};
 
 mod device;
 mod init;

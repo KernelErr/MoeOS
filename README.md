@@ -10,7 +10,7 @@
 
 目前MoeOS支持在QEMU和全志D1s芯片（人家比较喜欢[Nezha MQ](https://mangopi.org.cn/mangopi_mq)嘛）上运行，需要安装下面的工具：
 
-- Rust Toolchain（没工具链咋编译呀）
+- Rust **Nightly** Toolchain（没工具链咋编译呀）
 - QEMU（记得选RISC-V支持哦）
 - [xfel](https://github.com/xboot/xfel)（用于把MoeOS搬到板子的内存上啦）
 - make（既然有make为什么没有remake呢）
